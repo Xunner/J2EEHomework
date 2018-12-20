@@ -13,7 +13,7 @@ import java.io.PrintWriter;
  *
  * @author 巽
  **/
-@WebServlet("/LogIn")
+@WebServlet("/login")
 public class LogInServlet extends HttpServlet {
 	private String message;
 
@@ -22,6 +22,9 @@ public class LogInServlet extends HttpServlet {
 		resp.setContentType("text/html");
 		PrintWriter out = resp.getWriter();
 		out.println("<h1>" + message + "</h1>");
+		System.out.println(req.getContextPath());
+		System.out.println(req.getServletPath());
+		System.out.println(req.getPathInfo());
 	}
 
 	@Override
