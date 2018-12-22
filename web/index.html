@@ -5,18 +5,33 @@
     <title>J2EEHomework</title>
 </head>
 <body>
-<form method="post" action="/login">
-    <table border="0" align=center>
+<form method="get" action="logout">
+    <table border="0" align="left">
         <tr>
-            <td>User id</td>
+            <td>Hello</td>
+            <td>$userId</td>
+            <td><input type="submit" value="Log out"></td>
+        </tr>
+    </table>
+</form>
+<br>
+<br>
+<form method="post" action="buy">
+    <table border="0" align=left>
+        <tr>
+            <td>commodity name</td>
+            <td>number to buy</td>
+        </tr>
+        <tr>
+            <td>commodity 1</td>
             <td><label>
-                <input type="text" name="userId">
+                <input type="text" name="com1">
             </label></td>
         </tr>
         <tr>
-            <td>Password</td>
+            <td>commodity 2</td>
             <td><label>
-                <input type="password" name="password">
+                <input type="text" name="com2">
             </label></td>
         </tr>
         <tr>
