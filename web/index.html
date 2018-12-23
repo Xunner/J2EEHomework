@@ -16,31 +16,49 @@
 </form>
 <br>
 <br>
-<form method="post" action="buy">
-    <table border="0" align=left>
-        <tr>
-            <td>commodity name</td>
-            <td>number to buy</td>
-        </tr>
-        <tr>
-            <td>commodity 1</td>
-            <td><label>
-                <input type="text" name="com1">
-            </label></td>
-        </tr>
-        <tr>
-            <td>commodity 2</td>
-            <td><label>
-                <input type="text" name="com2">
-            </label></td>
-        </tr>
-        <tr>
-            <td colspan="2" align="center">
-                <input type="submit" value="Submit">
-                <input type="reset" value="Reset">
-            </td>
-        </tr>
-    </table>
-</form>
+<div style="float: left;">
+    <form method="post" action="add-to-cart">
+        <table border="1" align=left style="margin-right: 50px; margin-bottom: 30px">
+            <tr>
+                <td colspan="4" align="center">List of Commodities</td>
+            </tr>
+            <tr>
+                <td>name</td>
+                <td>price (￥)</td>
+                <td>description</td>
+                <td>number to buy</td>
+            </tr>
+            $commodities
+            <tr>
+                <td colspan="4" align="center">
+                    <input type="submit" value="Add to cart">
+                    <input type="reset" value="Reset">
+                </td>
+            </tr>
+        </table>
+    </form>
+    <form method="post" action="pay">
+        <table border="1" align=left>
+            <tr>
+                <td colspan="4" align="center">Cart</td>
+            </tr>
+            <tr>
+                <td>name</td>
+                <td>unit price (￥)</td>
+                <td>number</td>
+                <td>total (￥)</td>
+            </tr>
+            $cart
+            <tr>
+                <td colspan="4" align="right">Total price: $totalPrice</td>
+            </tr>
+            <tr>
+                <td colspan="4" align="center">
+                    <input type="submit" value="Pay">
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
 </body>
 </html>

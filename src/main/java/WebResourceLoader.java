@@ -7,7 +7,6 @@ import java.io.*;
  *
  * @author 巽
  **/
-@SuppressWarnings(value = "unused")
 class WebResourceLoader {
 	static String loadHtml(String fileName){
 		String encoding = "UTF-8";

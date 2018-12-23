@@ -1,11 +1,10 @@
 <Context>
 	<Resource name="jdbc/J2EEHomework" auth="Container"
 	          type="javax.sql.DataSource"
-	          maxActive="100"
-	          maxIdle="30"
-	          maxWait="10000"
+	          maxTotal="100"
+	          maxIdle="8"
 	          username="root"
 	          password="admin"
 	          driverClassName="com.mysql.jdbc.Driver"
-	          url="jdbc:mysql://localhost:3306/J2EEHomework?characterEncoding=UTF8"/>
+	          url="jdbc:mysql://localhost:3306/J2EEHomework?characterEncoding=UTF8&amp;autoReconnect=true&amp;useSSL=false"/>
 </Context>
