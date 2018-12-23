@@ -7,6 +7,7 @@ import javax.sql.DataSource;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -113,7 +114,12 @@ public class MainServlet extends HttpServlet {
 					for (String com_id : req.getParameterMap().keySet()) {
 						Integer number = Integer.valueOf(req.getParameter(com_id));
 						Integer id = Integer.valueOf(com_id);
-						cart.put(id, number + cart.getOrDefault(id, 0));    // 本次添加 + 购物车原有
+						number += cart.getOrDefault(id, 0); // 本次添加 + 购物车原有
+						if (number <= 0) {
+							cart.remove(id);
+						} else {
+							cart.put(id, number);
+						}
 //						System.out.println(com_id + ":" + req.getParameter(com_id));
 					}
 					session.setAttribute(CART_COOKIE, cart);
@@ -125,7 +131,51 @@ public class MainServlet extends HttpServlet {
 				if (session == null) {  // 首次打开网站的用户：跳转至登录页面
 					resp.sendRedirect(LOGIN_URI);
 				} else {
-
+					Map<Integer, Integer> cart = (Map<Integer, Integer>) session.getAttribute(CART_COOKIE);
+					double price = 0.0;
+					// 访问数据库
+					try (Connection connection = dataSource.getConnection();
+					     PreparedStatement getCommodityPS = connection.prepareStatement(
+							     "SELECT price FROM commodity WHERE com_id = ?");
+					     PreparedStatement newOrderPS = connection.prepareStatement(
+							     "INSERT INTO `order`(user_id, price, actual_payment, time, state) VALUES(?,?,?,?,?)",
+							     PreparedStatement.RETURN_GENERATED_KEYS)) {
+						// 查询商品单价，计算总价
+						for (Integer com_id : cart.keySet()) {
+							Integer number = cart.get(com_id);
+							getCommodityPS.setInt(1, com_id);
+							try (ResultSet resultSet = getCommodityPS.executeQuery()) {
+								price += resultSet.getDouble("price") * number;
+							}
+						}
+						double actualPayment = price;
+						if (price > 200) {  // 消费金额高：打七折
+							actualPayment *= 0.7;
+						}
+						// 添加订单
+						String userId = (String) session.getAttribute(USER_ID_COOKIE);
+						newOrderPS.setString(1, userId);
+						newOrderPS.setDouble(2, price);
+						newOrderPS.setDouble(3, actualPayment);
+						newOrderPS.setObject(4, LocalDateTime.now());
+						newOrderPS.setString(5, "unpaid");
+						newOrderPS.executeUpdate();
+						try (ResultSet resultSet = newOrderPS.getGeneratedKeys()) {
+							if (resultSet.next()) {
+								// TODO 事务
+							}
+						}
+						// 填写订单详情
+						// TODO
+					} catch (SQLException e) {
+						e.printStackTrace();
+					}
+					cart.clear();
+					session.setAttribute(CART_COOKIE, cart);
+//					PrintWriter out = resp.getWriter();
+//					out.println("<h1>Order in failed.</h1>");
+//					out.println("<h3>User id dose not exist, or password is wrong.</h2>");
+//					out.println("<h3>Click <a href=" + resp.encodeURL(LOGIN_URI) + ">here</a> to return.</h2>");
 				}
 				break;
 			default:
@@ -166,7 +216,7 @@ public class MainServlet extends HttpServlet {
 		     PreparedStatement commodityStatement = connection.prepareStatement("SELECT * FROM `commodity` LIMIT ?");
 		     PreparedStatement cartStatement = connection.prepareStatement("SELECT * FROM commodity WHERE com_id = ?")) {
 			// 获取商品列表信息
-			String commodityTemplate = "<tr><td>$name</td><td>$price</td><td>$comment</td><td><label><input type=\"number\" name=\"$com_id\" value=0></label></td></tr>";
+			String commodityTemplate = "<tr><td>$name</td><td align=\"right\">$price</td><td>$comment</td><td><label><input type=\"number\" name=\"$com_id\" value=0></label></td></tr>";
 			commodityStatement.setInt(1, 10);
 			try (ResultSet resultSet = commodityStatement.executeQuery()) {
 				while (resultSet.next()) {
@@ -178,7 +228,7 @@ public class MainServlet extends HttpServlet {
 				}
 			}
 			// 获取购物车商品信息
-			String cartTemplate = "<tr><td>$name</td><td>$unitPrice</td><td>$number</td><td>$total</td></tr>";
+			String cartTemplate = "<tr><td>$name</td><td align=\"right\">$unitPrice</td><td align=\"right\">$number</td><td align=\"right\">$total</td></tr>";
 			for (Integer com_id : cart.keySet()) {
 				cartStatement.setInt(1, com_id);
 				try (ResultSet resultSet = cartStatement.executeQuery()) {
