@@ -1,6 +1,8 @@
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 import javax.sql.DataSource;
@@ -139,7 +141,9 @@ public class MainServlet extends HttpServlet {
 							     "SELECT price FROM commodity WHERE com_id = ?");
 					     PreparedStatement newOrderPS = connection.prepareStatement(
 							     "INSERT INTO `order`(user_id, price, actual_payment, time, state) VALUES(?,?,?,?,?)",
-							     PreparedStatement.RETURN_GENERATED_KEYS)) {
+							     PreparedStatement.RETURN_GENERATED_KEYS);
+					     PreparedStatement orderMapPS = connection.prepareStatement(
+							     "INSERT INTO order_com_map(order_id, com_id, number) VALUES(?,?,?)")) {
 						// 查询商品单价，计算总价
 						for (Integer com_id : cart.keySet()) {
 							Integer number = cart.get(com_id);
@@ -159,19 +163,34 @@ public class MainServlet extends HttpServlet {
 						newOrderPS.setDouble(3, actualPayment);
 						newOrderPS.setObject(4, LocalDateTime.now());
 						newOrderPS.setString(5, "unpaid");
+						// 事务：添加订单及详情
+						connection.setAutoCommit(false);
 						newOrderPS.executeUpdate();
+						int orderId = 0;
 						try (ResultSet resultSet = newOrderPS.getGeneratedKeys()) {
 							if (resultSet.next()) {
-								// TODO 事务
+								orderId = resultSet.getInt(1);
 							}
 						}
-						// 填写订单详情
-						// TODO
+						if (orderId > 0) {
+							// 添加订单成功，依据orderId添加详情
+							for (Integer com_id : cart.keySet()) {
+								Integer number = cart.get(com_id);
+								orderMapPS.setInt(1, orderId);
+								orderMapPS.setInt(2, com_id);
+								orderMapPS.setInt(3, number);
+								orderMapPS.addBatch();  // 批量提交
+							}
+							orderMapPS.executeBatch();
+							connection.commit();            // 提交事务
+							connection.setAutoCommit(true); // 恢复自动commit
+						}
 					} catch (SQLException e) {
 						e.printStackTrace();
 					}
 					cart.clear();
 					session.setAttribute(CART_COOKIE, cart);
+					// TODO 返回信息
 //					PrintWriter out = resp.getWriter();
 //					out.println("<h1>Order in failed.</h1>");
 //					out.println("<h3>User id dose not exist, or password is wrong.</h2>");
