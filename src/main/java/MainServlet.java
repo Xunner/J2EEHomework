@@ -1,8 +1,6 @@
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 import javax.sql.DataSource;
@@ -22,13 +20,15 @@ import java.util.Map;
  **/
 @WebServlet(urlPatterns = {"/home", "/login", "/logout", "/add-to-cart", "/pay"})
 public class MainServlet extends HttpServlet {
-	private final static String CART_COOKIE = "cart";   // cookie名字，下同
+	private final static String CART_COOKIE = "cart";       // cookie名字，下同
 	private final static String USER_ID_COOKIE = "userId";
-	private final static String HOME_URI = "/home"; // 与注解中的URL pattern一致，下同
+	private final static String HOME_URI = "/home";         // 与注解中的URL pattern一致，下同
 	private final static String LOGIN_URI = "/login";
 	private final static String LOGOUT_URI = "/logout";
 	private final static String ADD_TO_CART_URI = "/add-to-cart";
 	private final static String PAY_URI = "/pay";
+	private final static double DISCOUNT_THRESHOLD = 200.0;  // 折扣门槛
+	private final static double DISCOUNT = 0.7;  // 折扣
 	private DataSource dataSource;
 
 	@Override
@@ -134,67 +134,87 @@ public class MainServlet extends HttpServlet {
 					resp.sendRedirect(LOGIN_URI);
 				} else {
 					Map<Integer, Integer> cart = (Map<Integer, Integer>) session.getAttribute(CART_COOKIE);
-					double price = 0.0;
+					double price = 0.0, actualPayment = 0.0;
 					// 访问数据库
-					try (Connection connection = dataSource.getConnection();
-					     PreparedStatement getCommodityPS = connection.prepareStatement(
-							     "SELECT price FROM commodity WHERE com_id = ?");
-					     PreparedStatement newOrderPS = connection.prepareStatement(
-							     "INSERT INTO `order`(user_id, price, actual_payment, time, state) VALUES(?,?,?,?,?)",
-							     PreparedStatement.RETURN_GENERATED_KEYS);
-					     PreparedStatement orderMapPS = connection.prepareStatement(
-							     "INSERT INTO order_com_map(order_id, com_id, number) VALUES(?,?,?)")) {
-						// 查询商品单价，计算总价
-						for (Integer com_id : cart.keySet()) {
-							Integer number = cart.get(com_id);
-							getCommodityPS.setInt(1, com_id);
-							try (ResultSet resultSet = getCommodityPS.executeQuery()) {
-								price += resultSet.getDouble("price") * number;
-							}
-						}
-						double actualPayment = price;
-						if (price > 200) {  // 消费金额高：打七折
-							actualPayment *= 0.7;
-						}
-						// 添加订单
-						String userId = (String) session.getAttribute(USER_ID_COOKIE);
-						newOrderPS.setString(1, userId);
-						newOrderPS.setDouble(2, price);
-						newOrderPS.setDouble(3, actualPayment);
-						newOrderPS.setObject(4, LocalDateTime.now());
-						newOrderPS.setString(5, "unpaid");
-						// 事务：添加订单及详情
-						connection.setAutoCommit(false);
-						newOrderPS.executeUpdate();
-						int orderId = 0;
-						try (ResultSet resultSet = newOrderPS.getGeneratedKeys()) {
-							if (resultSet.next()) {
-								orderId = resultSet.getInt(1);
-							}
-						}
-						if (orderId > 0) {
-							// 添加订单成功，依据orderId添加详情
+					boolean success = false;
+					try (Connection connection = dataSource.getConnection()) {
+						try (PreparedStatement getCommodityPS = connection.prepareStatement(
+								"SELECT price FROM commodity WHERE com_id = ?");
+						     PreparedStatement newOrderPS = connection.prepareStatement(
+								     "INSERT INTO `order`(user_id, price, actual_payment, time, state) VALUES(?,?,?,?,?)",
+								     PreparedStatement.RETURN_GENERATED_KEYS);
+						     PreparedStatement orderMapPS = connection.prepareStatement(
+								     "INSERT INTO order_com_map(order_id, com_id, number) VALUES(?,?,?)")) {
+							// 查询商品单价，计算总价
 							for (Integer com_id : cart.keySet()) {
 								Integer number = cart.get(com_id);
-								orderMapPS.setInt(1, orderId);
-								orderMapPS.setInt(2, com_id);
-								orderMapPS.setInt(3, number);
-								orderMapPS.addBatch();  // 批量提交
+								getCommodityPS.setInt(1, com_id);
+								try (ResultSet resultSet = getCommodityPS.executeQuery()) {
+									resultSet.first();
+									price += resultSet.getDouble("price") * number;
+								}
 							}
-							orderMapPS.executeBatch();
-							connection.commit();            // 提交事务
-							connection.setAutoCommit(true); // 恢复自动commit
+							actualPayment = price;
+							if (price >= DISCOUNT_THRESHOLD) {  // 消费金额高：打折
+								actualPayment *= DISCOUNT;
+							}
+							// 添加订单
+							String userId = (String) session.getAttribute(USER_ID_COOKIE);
+							newOrderPS.setString(1, userId);
+							newOrderPS.setDouble(2, price);
+							newOrderPS.setDouble(3, actualPayment);
+							newOrderPS.setObject(4, LocalDateTime.now());
+							newOrderPS.setString(5, "unpaid");
+							// 事务：添加订单及详情
+							connection.setAutoCommit(false);
+							newOrderPS.executeUpdate();
+							int orderId;
+							try (ResultSet resultSet = newOrderPS.getGeneratedKeys()) {
+								resultSet.first();
+								orderId = resultSet.getInt(1);
+							}
+							if (orderId > 0) {
+								// 添加订单成功，依据orderId添加详情
+								for (Integer com_id : cart.keySet()) {
+									Integer number = cart.get(com_id);
+									orderMapPS.setInt(1, orderId);
+									orderMapPS.setInt(2, com_id);
+									orderMapPS.setInt(3, number);
+									orderMapPS.addBatch();      // 批量提交
+								}
+								orderMapPS.executeBatch();
+								connection.commit();            // 提交事务
+								connection.setAutoCommit(true); // 恢复自动commit
+								success = true;
+							}
+						} catch (SQLException e) {
+							e.printStackTrace();
+							if (!connection.getAutoCommit()) {
+								connection.rollback();
+							}
 						}
 					} catch (SQLException e) {
 						e.printStackTrace();
 					}
-					cart.clear();
-					session.setAttribute(CART_COOKIE, cart);
-					// TODO 返回信息
-//					PrintWriter out = resp.getWriter();
-//					out.println("<h1>Order in failed.</h1>");
-//					out.println("<h3>User id dose not exist, or password is wrong.</h2>");
-//					out.println("<h3>Click <a href=" + resp.encodeURL(LOGIN_URI) + ">here</a> to return.</h2>");
+					// 返回信息
+					PrintWriter out = resp.getWriter();
+					if (success) {  // 下订单成功
+						out.println("<h2>Your order has been successfully generated.</h2>");
+						out.println("<h3>The total price is ￥" + price + ".</h3>");
+						if (actualPayment < price) {
+							out.println("<h3>As the amount of consumption exceeds ￥" + DISCOUNT_THRESHOLD
+									+ ", you can enjoy the " + DISCOUNT * 100 + "% discount.</h3>");
+							out.println("<h3>Your actual payment is ￥" + actualPayment + ".</h3>");
+						}
+						out.println("<h3>Click <a href=" + resp.encodeURL(HOME_URI) + ">here</a> to return.</h3>");
+						// 清空购物车
+						cart.clear();
+						session.setAttribute(CART_COOKIE, cart);
+					} else {    // 下订单失败
+						out.println("<h2>There are something wrong...</h2>");
+						out.println("<h3>Your order was not successfully generated.</h3>");
+						out.println("<h3>Click <a href=" + resp.encodeURL(HOME_URI) + ">here</a> to return.</h3>");
+					}
 				}
 				break;
 			default:
