@@ -6,6 +6,9 @@ import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 import javax.servlet.http.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static servlet.MainServlet.USER_ID_COOKIE;
 
 /**
@@ -20,6 +23,8 @@ public class OnlineNumberListener implements HttpSessionListener, HttpSessionAtt
 	private Integer totalNumber = 0;
 	private Integer loggedInNumber = 0;
 	private Integer visitorNumber = 0;
+	/** 由于删除Session时会逐一删除Attribute，故记下id让后面删除Attribute的监听失效 */
+	private List<String> destroyedSessionIds = new ArrayList<>();
 
 	@Override
 	public void sessionCreated(HttpSessionEvent se) {
@@ -41,6 +46,12 @@ public class OnlineNumberListener implements HttpSessionListener, HttpSessionAtt
 		} else {
 			sc.setAttribute("loggedInNumber", --loggedInNumber);
 		}
+
+		destroyedSessionIds.add(session.getId());
+		// 设置缓存上限和清理方法
+		if (destroyedSessionIds.size() > 5000) {
+			destroyedSessionIds.removeAll(destroyedSessionIds.subList(0, 4000));
+		}
 	}
 
 	@Override
@@ -56,9 +67,9 @@ public class OnlineNumberListener implements HttpSessionListener, HttpSessionAtt
 
 	@Override
 	public void attributeRemoved(HttpSessionBindingEvent se) {
-		if (se.getName().equals(USER_ID_COOKIE)) {
+		HttpSession session = se.getSession();
+		if (se.getName().equals(USER_ID_COOKIE) && !destroyedSessionIds.contains(session.getId())) {
 			System.out.println("Listen in the remove of session userId attribute: " + se.getSession().getId());
-			HttpSession session = se.getSession();
 			ServletContext sc = session.getServletContext();
 			sc.setAttribute("loggedInNumber", --loggedInNumber);
 			sc.setAttribute("visitorNumber", ++visitorNumber);
