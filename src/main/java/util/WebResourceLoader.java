@@ -1,3 +1,5 @@
+package util;
+
 import java.io.*;
 
 /**
@@ -7,8 +9,8 @@ import java.io.*;
  *
  * @author 巽
  **/
-class WebResourceLoader {
-	static String loadHtml(String fileName){
+public class WebResourceLoader {
+	public static String loadHtml(String fileName){
 		String encoding = "UTF-8";
 		File file = new File(fileName);
 //		System.out.println(file.getAbsolutePath());

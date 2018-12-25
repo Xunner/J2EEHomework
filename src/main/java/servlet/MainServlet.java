@@ -1,6 +1,11 @@
+package servlet;
+
+import util.WebResourceLoader;
+
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import javax.servlet.ServletContext;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 import javax.sql.DataSource;
@@ -20,8 +25,8 @@ import java.util.Map;
  **/
 @WebServlet(urlPatterns = {"/home", "/login", "/logout", "/add-to-cart", "/pay"})
 public class MainServlet extends HttpServlet {
-	private final static String CART_COOKIE = "cart";       // cookie名字，下同
-	private final static String USER_ID_COOKIE = "userId";
+	public final static String USER_ID_COOKIE = "userId";   // cookie名字，下同
+	private final static String CART_COOKIE = "cart";
 	private final static String HOME_URI = "/home";         // 与注解中的URL pattern一致，下同
 	private final static String LOGIN_URI = "/login";
 	private final static String LOGOUT_URI = "/logout";
@@ -43,20 +48,18 @@ public class MainServlet extends HttpServlet {
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-		req.setCharacterEncoding("utf-8");
-		resp.setContentType("text/html;charset=utf-8");
-		HttpSession session = req.getSession(false);
+		HttpSession session = req.getSession(true);
 		PrintWriter out = resp.getWriter();
 		if (req.getRequestURI().equals(LOGIN_URI)) { // 请求访问登录页面
 			System.out.println("get request: " + req.getRequestURI());
 			out.println(this.toLogIn(req));
-		} else if (session == null) {  // 首次打开网站的用户：跳转至登录页面
+		} else if (session.getAttribute(USER_ID_COOKIE) == null) {  // 首次打开网站的用户：跳转至登录页面
 			resp.sendRedirect(LOGIN_URI);
 		} else {    // 已登录用户
 			System.out.println("get request: " + req.getRequestURI());
 			switch (req.getRequestURI()) {
 				case LOGOUT_URI: // 注销
-					req.getSession().invalidate();
+					req.getSession().removeAttribute(USER_ID_COOKIE);
 					resp.sendRedirect(LOGIN_URI);
 					break;
 				case HOME_URI:   // 已登录用户请求访问主页
@@ -70,8 +73,6 @@ public class MainServlet extends HttpServlet {
 
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-		req.setCharacterEncoding("utf-8");
-		resp.setContentType("text/html;charset=utf-8");
 		System.out.println("post request: " + req.getRequestURI());
 		HttpSession session;
 		switch (req.getRequestURI()) {
@@ -108,8 +109,8 @@ public class MainServlet extends HttpServlet {
 				}
 				break;
 			case ADD_TO_CART_URI:    // 加入购物车
-				session = req.getSession(false);
-				if (session == null) {  // 首次打开网站的用户：跳转至登录页面
+				session = req.getSession(true);
+				if (session.getAttribute(USER_ID_COOKIE) == null) {  // 首次打开网站的用户：跳转至登录页面
 					resp.sendRedirect(LOGIN_URI);
 				} else {
 					Map<Integer, Integer> cart = (Map<Integer, Integer>) session.getAttribute(CART_COOKIE);
@@ -129,8 +130,8 @@ public class MainServlet extends HttpServlet {
 				}
 				break;
 			case PAY_URI:    // 支付
-				session = req.getSession(false);
-				if (session == null) {  // 首次打开网站的用户：跳转至登录页面
+				session = req.getSession(true);
+				if (session.getAttribute(USER_ID_COOKIE) == null) {  // 首次打开网站的用户：跳转至登录页面
 					resp.sendRedirect(LOGIN_URI);
 				} else {
 					Map<Integer, Integer> cart = (Map<Integer, Integer>) session.getAttribute(CART_COOKIE);
@@ -236,7 +237,12 @@ public class MainServlet extends HttpServlet {
 				break;
 			}
 		}
-		return WebResourceLoader.loadHtml(this.getServletContext().getRealPath("login.html")).replace("$userId", userId);
+		ServletContext sc = this.getServletContext();
+		return WebResourceLoader.loadHtml(this.getServletContext().getRealPath("login.html"))
+				.replace("$userId", userId)
+				.replace("$totalNumber", sc.getAttribute("totalNumber").toString())
+				.replace("$loggedInNumber", sc.getAttribute("loggedInNumber").toString())
+				.replace("$visitorNumber", sc.getAttribute("visitorNumber").toString());
 	}
 
 	/**
@@ -288,9 +294,12 @@ public class MainServlet extends HttpServlet {
 			e.printStackTrace();
 		}
 		// 替换模板内容
-		html = html.replace("$commodities", commoditySB.toString());
-		html = html.replace("$cart", cartSB.toString());
-		html = html.replace("$totalPrice", Double.toString(totalPrice));
-		return html;
+		ServletContext sc = this.getServletContext();
+		return html.replace("$commodities", commoditySB.toString())
+				.replace("$cart", cartSB.toString())
+				.replace("$totalPrice", Double.toString(totalPrice))
+				.replace("$totalNumber", sc.getAttribute("totalNumber").toString())
+				.replace("$loggedInNumber", sc.getAttribute("loggedInNumber").toString())
+				.replace("$visitorNumber", sc.getAttribute("visitorNumber").toString());
 	}
 }
