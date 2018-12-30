@@ -1,113 +1,85 @@
 <template>
-  <div class="hello">
-    <h1>{{ msg }}</h1>
-    <h2>Essential Links</h2>
-    <ul>
-      <li>
-        <a
-          href="https://vuejs.org"
-          target="_blank"
-        >
-          Core Docs
-        </a>
-      </li>
-      <li>
-        <a
-          href="https://forum.vuejs.org"
-          target="_blank"
-        >
-          Forum
-        </a>
-      </li>
-      <li>
-        <a
-          href="https://chat.vuejs.org"
-          target="_blank"
-        >
-          Community Chat
-        </a>
-      </li>
-      <li>
-        <a
-          href="https://twitter.com/vuejs"
-          target="_blank"
-        >
-          Twitter
-        </a>
-      </li>
-      <br>
-      <li>
-        <a
-          href="http://vuejs-templates.github.io/webpack/"
-          target="_blank"
-        >
-          Docs for This Template
-        </a>
-      </li>
-    </ul>
-    <h2>Ecosystem</h2>
-    <ul>
-      <li>
-        <a
-          href="http://router.vuejs.org/"
-          target="_blank"
-        >
-          vue-router
-        </a>
-      </li>
-      <li>
-        <a
-          href="http://vuex.vuejs.org/"
-          target="_blank"
-        >
-          vuex
-        </a>
-      </li>
-      <li>
-        <a
-          href="http://vue-loader.vuejs.org/"
-          target="_blank"
-        >
-          vue-loader
-        </a>
-      </li>
-      <li>
-        <a
-          href="https://github.com/vuejs/awesome-vue"
-          target="_blank"
-        >
-          awesome-vue
-        </a>
-      </li>
-    </ul>
+  <div id="app">
+    <label>在线总人数：{{totalNumber}}，已登录用户数：{{loggedInNumber}}，游客数：{{visitorNumber}}</label>
+    <form method="get" action="logout">
+      <table border="0" align="left">
+        <tr>
+          <td>Hello</td>
+          <td>{{userId}}</td>
+          <td><input type="submit" value="Log out"></td>
+        </tr>
+      </table>
+    </form>
+    <br>
+    <br>
+    <div style="float: left;">
+      <form method="post" action="add-to-cart">
+        <table border="1" align=left style="margin-right: 50px; margin-bottom: 30px">
+          <tr>
+            <td colspan="4" align="center">List of Commodities</td>
+          </tr>
+          <tr>
+            <td>name</td>
+            <td>price (￥)</td>
+            <td>description</td>
+            <td>number to buy</td>
+          </tr>
+          $commodities
+          <tr>
+            <td colspan="4" align="center">
+              <input type="submit" value="Add to cart">
+              <input type="reset" value="Reset">
+            </td>
+          </tr>
+        </table>
+      </form>
+      <form method="post" action="pay">
+        <table border="1" align=left>
+          <tr>
+            <td colspan="4" align="center">Cart</td>
+          </tr>
+          <tr>
+            <td>name</td>
+            <td>unit price (￥)</td>
+            <td>number</td>
+            <td>total (￥)</td>
+          </tr>
+          $cart
+          <tr>
+            <td colspan="4" align="right">Total price: ￥{{totalPrice}}</td>
+          </tr>
+          <tr>
+            <td colspan="4" align="center">
+              <input type="submit" value="Pay">
+            </td>
+          </tr>
+        </table>
+      </form>
+    </div>
   </div>
 </template>
 
 <script>
-export default {
-  name: 'HelloWorld',
-  data () {
+module.exports = {
+  data: function () {
     return {
-      msg: 'Welcome to Your Vue.js App'
+      userId: '123',
+      totalNumber: 1,
+      loggedInNumber: 0,
+      visitorNumber: 1,
+      totalPrice: 100
     }
   }
 }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-h1, h2 {
-  font-weight: normal;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
-}
+  #app {
+    font-family: 'Avenir', Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-align: center;
+    color: #66ccff;
+    margin-top: 60px;
+  }
 </style>
