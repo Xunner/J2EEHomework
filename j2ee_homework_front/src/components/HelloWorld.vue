@@ -77,12 +77,12 @@ module.exports = {
       totalNumber: 1,
       loggedInNumber: 0,
       visitorNumber: 1,
-      cart: [{comId: 1, name: 'Gujian3', unitPrice: 99.0, number: 2},
+      cart: [{comId: 1, name: '古剑3', unitPrice: 99.0, number: 2},
         {comId: 2, name: 'Overcooked', unitPrice: 69.0, number: 4}],
-      commodities: [{comId: 1, name: 'Gujian3', price: 99.0, comment: 'Hope of Chinese game'},
+      commodities: [{comId: 1, name: '古剑3', price: 99.0, comment: 'Hope of Chinese game'},
         {comId: 2, name: 'Overcooked', price: 69.0, comment: 'Best multi-player games this year'}]
     }
-    this.axios.get('/home.data')
+    this.axios.get('/home.ajax')
       .then(function (resp) {
         console.log('Success!')
         console.log(resp)

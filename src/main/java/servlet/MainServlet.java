@@ -6,6 +6,7 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 import javax.sql.DataSource;
@@ -23,11 +24,12 @@ import java.util.Map;
  *
  * @author 巽
  **/
-@WebServlet(urlPatterns = {"/home", "/login", "/logout", "/add-to-cart", "/pay"})
+@WebServlet(urlPatterns = {"/home", "/login", "/logout", "/add-to-cart", "/pay", "*.ajax"})
 public class MainServlet extends HttpServlet {
 	public final static String USER_ID_COOKIE = "userId";   // cookie名字，下同
 	private final static String CART_COOKIE = "cart";
 	private final static String HOME_URI = "/home";         // 与注解中的URL pattern一致，下同
+	private final static String HOME_AJAX = "/home.ajax";
 	private final static String LOGIN_URI = "/login";
 	private final static String LOGOUT_URI = "/logout";
 	private final static String ADD_TO_CART_URI = "/add-to-cart";
@@ -47,23 +49,28 @@ public class MainServlet extends HttpServlet {
 	}
 
 	@Override
-	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
 		HttpSession session = req.getSession(true);
 		PrintWriter out = resp.getWriter();
 		if (req.getRequestURI().equals(LOGIN_URI)) { // 请求访问登录页面
 			System.out.println("get request: " + req.getRequestURI());
 			out.println(this.toLogIn(req));
 		} else if (session.getAttribute(USER_ID_COOKIE) == null) {  // 首次打开网站的用户：跳转至登录页面
+//			this.getServletContext().getRequestDispatcher(LOGIN_URI).forward(req, resp);
 			resp.sendRedirect(LOGIN_URI);
 		} else {    // 已登录用户
 			System.out.println("get request: " + req.getRequestURI());
 			switch (req.getRequestURI()) {
 				case LOGOUT_URI: // 注销
 					req.getSession().removeAttribute(USER_ID_COOKIE);
+//					this.getServletContext().getRequestDispatcher(LOGIN_URI).forward(req, resp);
 					resp.sendRedirect(LOGIN_URI);
 					break;
 				case HOME_URI:   // 已登录用户请求访问主页
 					out.println(this.toIndex((String) session.getAttribute(USER_ID_COOKIE), (Map<Integer, Integer>) session.getAttribute(CART_COOKIE)));
+					break;
+				case HOME_AJAX:
+					out.println();  // TODO use vue
 					break;
 				default:
 					System.out.println("未处理请求：" + req.getRequestURI());
@@ -87,7 +94,7 @@ public class MainServlet extends HttpServlet {
 					preparedStatement.setString(2, password);
 					try (ResultSet resultSet = preparedStatement.executeQuery()) {
 						if (resultSet.first()) {    // 登录成功
-							System.out.println("user succeed in log-in: " + userId);
+							System.out.println("\tuser succeed in log-in: " + userId);
 							session = req.getSession(true);
 							Map<Integer, Integer> cart = new HashMap<>();
 							session.setAttribute(CART_COOKIE, cart); // 新建购物车
@@ -96,7 +103,7 @@ public class MainServlet extends HttpServlet {
 							resp.addCookie(cookie);
 							resp.sendRedirect(HOME_URI);
 						} else {    // 登录失败
-							System.out.println("user failed in log-in: " + userId);
+							System.out.println("\tuser failed in log-in: " + userId);
 							PrintWriter out = resp.getWriter();
 							out.println("<h1>Log in failed.</h1>");
 							out.println("<h3>User id dose not exist, or password is wrong.</h2>");
@@ -219,7 +226,7 @@ public class MainServlet extends HttpServlet {
 				}
 				break;
 			default:
-				System.out.println("未处理请求：" + req.getRequestURI());
+				System.out.println("\t未处理请求：" + req.getRequestURI());
 		}
 	}
 

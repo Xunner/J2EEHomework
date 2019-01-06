@@ -28,7 +28,7 @@ public class OnlineNumberListener implements HttpSessionListener, HttpSessionAtt
 
 	@Override
 	public void sessionCreated(HttpSessionEvent se) {
-		System.out.println("Listen in the creation of session: " + se.getSession().getId());
+//		System.out.println("Listen in the creation of session: " + se.getSession().getId());
 		HttpSession session = se.getSession();
 		ServletContext sc = session.getServletContext();
 		sc.setAttribute("totalNumber", ++totalNumber);
@@ -37,7 +37,7 @@ public class OnlineNumberListener implements HttpSessionListener, HttpSessionAtt
 
 	@Override
 	public void sessionDestroyed(HttpSessionEvent se) {
-		System.out.println("Listen in the destroy of session: " + se.getSession().getId());
+//		System.out.println("Listen in the destroy of session: " + se.getSession().getId());
 		HttpSession session = se.getSession();
 		ServletContext sc = session.getServletContext();
 		sc.setAttribute("totalNumber", --totalNumber);
@@ -57,7 +57,7 @@ public class OnlineNumberListener implements HttpSessionListener, HttpSessionAtt
 	@Override
 	public void attributeAdded(HttpSessionBindingEvent se) {
 		if (se.getName().equals(USER_ID_COOKIE)) {
-			System.out.println("Listen in the addition of session userId attribute: " + se.getSession().getId());
+//			System.out.println("Listen in the addition of session userId attribute: " + se.getSession().getId());
 			HttpSession session = se.getSession();
 			ServletContext sc = session.getServletContext();
 			sc.setAttribute("loggedInNumber", ++loggedInNumber);
@@ -69,7 +69,7 @@ public class OnlineNumberListener implements HttpSessionListener, HttpSessionAtt
 	public void attributeRemoved(HttpSessionBindingEvent se) {
 		HttpSession session = se.getSession();
 		if (se.getName().equals(USER_ID_COOKIE) && !destroyedSessionIds.contains(session.getId())) {
-			System.out.println("Listen in the remove of session userId attribute: " + se.getSession().getId());
+//			System.out.println("Listen in the remove of session userId attribute: " + se.getSession().getId());
 			ServletContext sc = session.getServletContext();
 			sc.setAttribute("loggedInNumber", --loggedInNumber);
 			sc.setAttribute("visitorNumber", ++visitorNumber);
@@ -78,7 +78,7 @@ public class OnlineNumberListener implements HttpSessionListener, HttpSessionAtt
 
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
-		System.out.println("Listen in the initial of ServletContext.");
+//		System.out.println("Listen in the initial of ServletContext.");
 		ServletContext sc = sce.getServletContext();
 		sc.setAttribute("totalNumber", 0);
 		sc.setAttribute("loggedInNumber", 0);
