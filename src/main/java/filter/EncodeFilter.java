@@ -22,7 +22,11 @@ public class EncodeFilter implements Filter {
 			HttpServletRequest request = (HttpServletRequest) servletRequest;
 			HttpServletResponse response = (HttpServletResponse) servletResponse;
 //			System.out.println("    intercept: " + request.getRequestURI());
-			if (!request.getRequestURI().contains("static")) {
+			if (request.getRequestURI().contains(".ajax")) {
+				request.setCharacterEncoding("utf-8");
+				response.setCharacterEncoding("utf-8");
+				response.setContentType("application/json;charset=utf-8");
+			} else if (!request.getRequestURI().contains("static")) {
 //				System.out.println("    modify encode to utf-8");
 				request.setCharacterEncoding("utf-8");
 				response.setContentType("text/html;charset=utf-8");

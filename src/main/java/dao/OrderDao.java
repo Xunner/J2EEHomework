@@ -1,5 +1,6 @@
 package dao;
 
+import enums.Result;
 import po.OrderPO;
 
 /**
@@ -11,5 +12,6 @@ import po.OrderPO;
  **/
 public interface OrderDao {
 	OrderPO getById(int orderId);
-	int addOrder(OrderPO orderPO);
+
+	Result addOrder(OrderPO orderPO);
 }

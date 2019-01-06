@@ -1,6 +1,10 @@
 package factory;
 
+import service.CommodityService;
+import service.OrderService;
 import service.UserService;
+import service.impl.CommodityServiceImpl;
+import service.impl.OrderServiceImpl;
 import service.impl.UserServiceImpl;
 
 /**
@@ -13,5 +17,13 @@ import service.impl.UserServiceImpl;
 public class ServiceFactory {
 	public static UserService getUserService() {
 		return UserServiceImpl.getInstance();
+	}
+
+	public static OrderService getOrderService() {
+		return OrderServiceImpl.getInstance();
+	}
+
+	public static CommodityService getCommodityService() {
+		return CommodityServiceImpl.getInstance();
 	}
 }

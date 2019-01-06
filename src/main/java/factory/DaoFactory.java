@@ -1,6 +1,10 @@
 package factory;
 
+import dao.CommodityDao;
+import dao.OrderDao;
 import dao.UserDao;
+import dao.impl.CommodityDaoImpl;
+import dao.impl.OrderDaoImpl;
 import dao.impl.UserDaoImpl;
 
 /**
@@ -13,5 +17,13 @@ import dao.impl.UserDaoImpl;
 public class DaoFactory {
 	public static UserDao getUserDao() {
 		return UserDaoImpl.getInstance();
+	}
+
+	public static OrderDao getOrderDao() {
+		return OrderDaoImpl.getInstance();
+	}
+
+	public static CommodityDao getCommodityDao() {
+		return CommodityDaoImpl.getInstance();
 	}
 }

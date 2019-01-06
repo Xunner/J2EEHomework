@@ -15,4 +15,11 @@ public class CommodityPO {
 	private String name;
 	private double price;
 	private String comment;
+
+	public CommodityPO(int comId, String name, double price, String comment) {
+		this.comId = comId;
+		this.name = name;
+		this.price = price;
+		this.comment = comment;
+	}
 }

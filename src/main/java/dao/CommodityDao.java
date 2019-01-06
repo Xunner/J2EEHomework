@@ -2,6 +2,8 @@ package dao;
 
 import po.CommodityPO;
 
+import java.util.List;
+
 /**
  * 商品Dao
  * <br>
@@ -11,4 +13,6 @@ import po.CommodityPO;
  **/
 public interface CommodityDao {
 	CommodityPO getById(int comId);
+
+	List<CommodityPO> getAll();
 }
