@@ -1,6 +1,6 @@
 package dao;
 
-import model.Commodity;
+import po.CommodityPO;
 
 /**
  * 商品Dao
@@ -10,5 +10,5 @@ import model.Commodity;
  * @author 巽
  **/
 public interface CommodityDao {
-	Commodity getById(int comId);
+	CommodityPO getById(int comId);
 }

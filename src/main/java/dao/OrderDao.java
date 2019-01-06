@@ -1,6 +1,6 @@
 package dao;
 
-import model.Order;
+import po.OrderPO;
 
 /**
  * 订单Dao
@@ -10,6 +10,6 @@ import model.Order;
  * @author 巽
  **/
 public interface OrderDao {
-	Order getById(int orderId);
-	int addOrder(Order order);
+	OrderPO getById(int orderId);
+	int addOrder(OrderPO orderPO);
 }

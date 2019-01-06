@@ -23,11 +23,11 @@ CREATE TABLE `commodity` (
 INSERT INTO `commodity` VALUES (1,'古剑奇谭3',99.00,'国产单机的希望之光'),(2,'DotA2 Plus',24.00,'真正的免费游戏');
 
 #
-# Structure for table "order"
+# Structure for table "orderPO"
 #
 
-DROP TABLE IF EXISTS `order`;
-CREATE TABLE `order` (
+DROP TABLE IF EXISTS `orderPO`;
+CREATE TABLE `orderPO` (
   `order_id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` varchar(255) DEFAULT NULL,
   `price` double(8,2) DEFAULT '0.00',
@@ -38,10 +38,10 @@ CREATE TABLE `order` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 #
-# Data for table "order"
+# Data for table "orderPO"
 #
 
-INSERT INTO `order` VALUES (1,'xunner',123.00,123.00,'2018-12-24 23:49:26','unpaid'),(2,'xunner',495.00,346.50,'2018-12-24 23:49:59','unpaid'),(3,'xunner',294.00,205.80,'2018-12-24 23:53:52','unpaid'),(4,'xunner',1230.00,861.00,'2018-12-24 23:57:57','unpaid');
+INSERT INTO `orderPO` VALUES (1,'xunner',123.00,123.00,'2018-12-24 23:49:26','unpaid'),(2,'xunner',495.00,346.50,'2018-12-24 23:49:59','unpaid'),(3,'xunner',294.00,205.80,'2018-12-24 23:53:52','unpaid'),(4,'xunner',1230.00,861.00,'2018-12-24 23:57:57','unpaid');
 
 #
 # Structure for table "order_com_map"

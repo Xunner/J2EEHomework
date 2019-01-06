@@ -1,6 +1,7 @@
-package model;
+package po;
 
-import util.OrderState;
+import enums.OrderState;
+import lombok.Data;
 
 import java.time.LocalDateTime;
 
@@ -11,7 +12,8 @@ import java.time.LocalDateTime;
  *
  * @author 巽
  **/
-public class Order {
+@Data
+public class OrderPO {
 	private int orderId;
 	private String userId;
 	private double price;

@@ -1,4 +1,6 @@
-package model;
+package po;
+
+import lombok.Data;
 
 /**
  * 商品对象
@@ -7,7 +9,8 @@ package model;
  *
  * @author 巽
  **/
-public class Commodity {
+@Data
+public class CommodityPO {
 	private int comId;
 	private String name;
 	private double price;

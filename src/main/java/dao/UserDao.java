@@ -1,6 +1,6 @@
 package dao;
 
-import model.User;
+import po.UserPO;
 
 /**
  * 用户Dao
@@ -10,5 +10,5 @@ import model.User;
  * @author 巽
  **/
 public interface UserDao {
-	User getById(String userId);
+	UserPO getById(String userId);
 }
