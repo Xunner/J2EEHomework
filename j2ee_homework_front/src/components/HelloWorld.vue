@@ -82,15 +82,6 @@ module.exports = {
       commodities: [{comId: 1, name: '古剑3', price: 99.0, comment: 'Hope of Chinese game'},
         {comId: 2, name: 'Overcooked', price: 69.0, comment: 'Best multi-player games this year'}]
     }
-    this.axios.get('/home.ajax')
-      .then(function (resp) {
-        console.log('Success!')
-        console.log(resp)
-        ret = resp
-      })
-      .catch(function (err) {
-        console.log(err)
-      })
     return ret
   },
   computed: {
@@ -99,6 +90,22 @@ module.exports = {
         return sum + commodity.number * commodity.unitPrice
       }, 0)
     }
+  },
+  create: function () {
+    this.axios.get('/home.ajax')
+      .then(function (resp) {
+        console.log('Success!')
+        console.log(resp)
+        this.userId = resp.userId
+        this.totalNumber = resp.totalNumber
+        this.loggedInNumber = resp.loggedInNumber
+        this.visitorNumber = resp.visitorNumber
+        this.cart = resp.cart
+        this.commodities = resp.commodities
+      })
+      .catch(function (err) {
+        console.log(err)
+      })
   }
 }
 </script>
@@ -109,7 +116,7 @@ module.exports = {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-align: center;
-    color: #66ccff;
+    color: black;
     margin-top: 5px;
   }
 </style>
