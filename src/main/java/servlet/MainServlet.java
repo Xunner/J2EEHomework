@@ -197,14 +197,4 @@ public class MainServlet extends HttpServlet {
 				.replace("$loggedInNumber", sc.getAttribute("loggedInNumber").toString())
 				.replace("$visitorNumber", sc.getAttribute("visitorNumber").toString());
 	}
-
-//	/**
-//	 * 跳转至主页面
-//	 *
-//	 * @param userId 用户id
-//	 * @return 主页面的HTML
-//	 */
-//	private String toIndex(String userId, Map<Integer, Integer> cart) {
-//		return WebResourceLoader.loadHtml(this.getServletContext().getRealPath("index.html"));
-//	}
 }
