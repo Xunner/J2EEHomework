@@ -93,7 +93,7 @@ export default {
   },
   created () {
     let self = this
-    this.axios.get('/home.ajax')
+    this.axios.get('/EJBClient_war_exploded/home.ajax')
       .then(function (resp) {
         // console.log('Success!')
         let data = resp.data
