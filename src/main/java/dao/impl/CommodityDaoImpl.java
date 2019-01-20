@@ -1,18 +1,11 @@
 package dao.impl;
 
 import dao.CommodityDao;
+import org.hibernate.Session;
 import po.CommodityPO;
-import po.UserPO;
+import util.HibernateUtil;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
+import javax.persistence.criteria.CriteriaQuery;
 import java.util.List;
 
 /**
@@ -24,15 +17,8 @@ import java.util.List;
  **/
 public class CommodityDaoImpl implements CommodityDao {
 	private static CommodityDaoImpl singleImplement = new CommodityDaoImpl();
-	private DataSource dataSource;
 
 	private CommodityDaoImpl() {
-		try {
-			Context context = new InitialContext();
-			dataSource = (DataSource) context.lookup("java:comp/env/jdbc/J2EEHomework");
-		} catch (NamingException e) {
-			e.printStackTrace();
-		}
 	}
 
 	public static CommodityDaoImpl getInstance() {
@@ -41,40 +27,15 @@ public class CommodityDaoImpl implements CommodityDao {
 
 	@Override
 	public CommodityPO getById(int comId) {
-		try (Connection connection = dataSource.getConnection();
-		     PreparedStatement preparedStatement = connection.prepareStatement(
-				     "SELECT * FROM `commodity` WHERE com_id = ?")) {
-			preparedStatement.setInt(1, comId);
-			try (ResultSet resultSet = preparedStatement.executeQuery()) {
-				resultSet.first();
-				return new CommodityPO(resultSet.getInt("com_id"),
-						resultSet.getString("name"),
-						resultSet.getDouble("price"),
-						resultSet.getString("comment"));
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return null;
+		Session session = HibernateUtil.getSession();
+		return session.load(CommodityPO.class, comId);
 	}
 
 	@Override
 	public List<CommodityPO> getAll() {
-		List<CommodityPO> ret = new ArrayList<>();
-		try (Connection connection = dataSource.getConnection();
-		     PreparedStatement preparedStatement = connection.prepareStatement(
-				     "SELECT * FROM `commodity` LIMIT 100")) {
-			try (ResultSet resultSet = preparedStatement.executeQuery()) {
-				while (resultSet.next()) {
-					ret.add(new CommodityPO(resultSet.getInt("com_id"),
-							resultSet.getString("name"),
-							resultSet.getDouble("price"),
-							resultSet.getString("comment")));
-				}
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return ret;
+		Session session = HibernateUtil.getSession();
+		CriteriaQuery<CommodityPO> criteriaQuery = session.getCriteriaBuilder().createQuery(CommodityPO.class);
+		criteriaQuery.from(CommodityPO.class);
+		return session.createQuery(criteriaQuery).getResultList();
 	}
 }

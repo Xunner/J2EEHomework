@@ -11,7 +11,7 @@ import java.util.Map;
  * @author 巽
  **/
 public enum OrderState {
-	PAID("paid"), UNPAID("unpaid"), CANCELED("canceled");
+	paid("paid"), unpaid("unpaid"), canceled("canceled");
 
 	private final static Map<String, OrderState> map = new HashMap<>();
 

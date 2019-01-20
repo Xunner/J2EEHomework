@@ -48,7 +48,7 @@ public class OrderServiceImpl implements OrderService {
 		if (price >= MainServlet.DISCOUNT_THRESHOLD) {  // 消费金额高：打折
 			actualPayment *= MainServlet.DISCOUNT;
 		}
-		Result result = orderDao.addOrder(new OrderPO(userId, price, actualPayment, LocalDateTime.now(), OrderState.UNPAID, commodities));
+		Result result = orderDao.addOrder(new OrderPO(userId, price, actualPayment, LocalDateTime.now(), OrderState.unpaid, commodities));
 		return new PayVO(result, price, actualPayment);
 	}
 }
