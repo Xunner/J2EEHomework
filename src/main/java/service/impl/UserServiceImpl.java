@@ -2,7 +2,8 @@ package service.impl;
 
 import dao.UserDao;
 import enums.Result;
-import factory.DaoFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import po.UserPO;
 import service.UserService;
 
@@ -13,15 +14,13 @@ import service.UserService;
  *
  * @author 巽
  **/
+@Service
 public class UserServiceImpl implements UserService {
-	private final static UserServiceImpl singleImplement = new UserServiceImpl();
-	private final UserDao userDao = DaoFactory.getUserDao();
+	private final UserDao userDao;
 
-	private UserServiceImpl() {
-	}
-
-	public static UserServiceImpl getInstance() {
-		return singleImplement;
+	@Autowired
+	public UserServiceImpl(UserDao userDao) {
+		this.userDao = userDao;
 	}
 
 	@Override

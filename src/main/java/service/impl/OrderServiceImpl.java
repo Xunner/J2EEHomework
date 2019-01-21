@@ -4,7 +4,8 @@ import dao.CommodityDao;
 import dao.OrderDao;
 import enums.OrderState;
 import enums.Result;
-import factory.DaoFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import po.CommodityPO;
 import po.OrderPO;
 import service.OrderService;
@@ -22,16 +23,15 @@ import java.util.Map;
  *
  * @author 巽
  **/
+@Service
 public class OrderServiceImpl implements OrderService {
-	private final static OrderServiceImpl singleImplement = new OrderServiceImpl();
-	private final OrderDao orderDao = DaoFactory.getOrderDao();
-	private final CommodityDao commodityDao = DaoFactory.getCommodityDao();
+	private final OrderDao orderDao;
+	private final CommodityDao commodityDao;
 
-	private OrderServiceImpl() {
-	}
-
-	public static OrderServiceImpl getInstance() {
-		return singleImplement;
+	@Autowired
+	public OrderServiceImpl(OrderDao orderDao, CommodityDao commodityDao) {
+		this.orderDao = orderDao;
+		this.commodityDao = commodityDao;
 	}
 
 	@Override

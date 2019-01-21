@@ -2,6 +2,7 @@ package dao.impl;
 
 import dao.UserDao;
 import org.hibernate.Session;
+import org.springframework.stereotype.Repository;
 import po.UserPO;
 import util.HibernateUtil;
 
@@ -12,16 +13,8 @@ import util.HibernateUtil;
  *
  * @author 巽
  **/
+@Repository
 public class UserDaoImpl implements UserDao {
-	private static UserDaoImpl singleImplement = new UserDaoImpl();
-
-	private UserDaoImpl() {
-	}
-
-	public static UserDaoImpl getInstance() {
-		return singleImplement;
-	}
-
 	@Override
 	public UserPO getById(String userId) {
 		Session session = HibernateUtil.getSession();

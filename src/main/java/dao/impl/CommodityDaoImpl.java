@@ -2,6 +2,7 @@ package dao.impl;
 
 import dao.CommodityDao;
 import org.hibernate.Session;
+import org.springframework.stereotype.Repository;
 import po.CommodityPO;
 import util.HibernateUtil;
 
@@ -15,16 +16,8 @@ import java.util.List;
  *
  * @author 巽
  **/
+@Repository
 public class CommodityDaoImpl implements CommodityDao {
-	private static CommodityDaoImpl singleImplement = new CommodityDaoImpl();
-
-	private CommodityDaoImpl() {
-	}
-
-	public static CommodityDaoImpl getInstance() {
-		return singleImplement;
-	}
-
 	@Override
 	public CommodityPO getById(int comId) {
 		Session session = HibernateUtil.getSession();

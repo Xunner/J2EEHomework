@@ -4,6 +4,7 @@ import dao.OrderDao;
 import enums.Result;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.springframework.stereotype.Repository;
 import po.OrderPO;
 import util.HibernateUtil;
 
@@ -14,16 +15,8 @@ import util.HibernateUtil;
  *
  * @author 巽
  **/
+@Repository
 public class OrderDaoImpl implements OrderDao {
-	private static OrderDaoImpl singleImplement = new OrderDaoImpl();
-
-	private OrderDaoImpl() {
-	}
-
-	public static OrderDaoImpl getInstance() {
-		return singleImplement;
-	}
-
 	@Override
 	public OrderPO getById(int orderId) {
 		Session session = HibernateUtil.getSession();

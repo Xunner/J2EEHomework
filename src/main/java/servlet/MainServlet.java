@@ -2,7 +2,8 @@ package servlet;
 
 import com.alibaba.fastjson.JSON;
 import enums.Result;
-import factory.ServiceFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import po.CommodityPO;
 import service.CommodityService;
 import service.OrderService;
@@ -41,9 +42,18 @@ public class MainServlet extends HttpServlet {
 	private final static String LOGOUT_URI = "/logout";
 	private final static String ADD_TO_CART_URI = "/add-to-cart";
 	private final static String PAY_URI = "/pay";
-	private UserService userService = ServiceFactory.getUserService();
-	private OrderService orderService = ServiceFactory.getOrderService();
-	private CommodityService commodityService = ServiceFactory.getCommodityService();
+	private UserService userService;
+	private OrderService orderService;
+	private CommodityService commodityService;
+
+	@Override
+	public void init() throws ServletException {
+		super.init();
+		ApplicationContext applicationContext = new ClassPathXmlApplicationContext("applicationContext.xml");
+		userService = (UserService) applicationContext.getBean("UserService");
+		orderService = (OrderService) applicationContext.getBean("OrderService");
+		commodityService = (CommodityService) applicationContext.getBean("CommodityService");
+	}
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {

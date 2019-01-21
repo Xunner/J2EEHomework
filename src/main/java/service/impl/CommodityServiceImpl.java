@@ -1,7 +1,8 @@
 package service.impl;
 
 import dao.CommodityDao;
-import factory.DaoFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import po.CommodityPO;
 import service.CommodityService;
 
@@ -16,15 +17,13 @@ import java.util.Set;
  *
  * @author 巽
  **/
+@Service
 public class CommodityServiceImpl implements CommodityService {
-	private final static CommodityServiceImpl singleImplement = new CommodityServiceImpl();
-	private final CommodityDao commodityDao = DaoFactory.getCommodityDao();
+	private final CommodityDao commodityDao;
 
-	private CommodityServiceImpl() {
-	}
-
-	public static CommodityServiceImpl getInstance() {
-		return singleImplement;
+	@Autowired
+	public CommodityServiceImpl(CommodityDao commodityDao) {
+		this.commodityDao = commodityDao;
 	}
 
 	@Override
